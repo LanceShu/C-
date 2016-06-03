@@ -1,0 +1,495 @@
+#include "graphics.h"
+#include "windows.h"
+#include "conio.h"
+#include "stdio.h"
+#include "string.h"
+#include "stdlib.h"
+#define N 100
+
+const int max = 100;
+
+typedef struct
+{
+	char data[N][N];
+	int top;
+
+}stack;
+ 
+typedef struct figure
+{
+	char x[N];
+}figure;
+
+void chuli(char ch[],struct figure a[]);
+void clear_cal();
+
+void init(stack *sta);
+void inffixtosuffix(stack *sta,figure a[],char suffix[][max],int *length);
+void suffixtoresult(stack *sta,char suffix[][max],int length);
+
+void calcul_memu()
+{
+	setfillcolor(BLACK);
+	solidrectangle(0,100,480,600);
+	
+	setcolor(DARKGRAY);
+	line(0,100,480,100);
+	line(0,200,480,200);
+	line(0,300,480,300);
+	line(0,400,480,400);
+	line(0,500,480,500);
+	line(120,100,120,600);
+	line(240,100,240,600);
+	line(360,100,360,600);
+
+	settextstyle(60,60,_T("幼圆"));
+	outtextxy(30,120,_T("("));
+	outtextxy(150,120,_T(")"));
+	outtextxy(390,120,_T("+"));
+	outtextxy(30,220,_T("7"));
+	outtextxy(150,220,_T("8"));
+	outtextxy(270,220,_T("9"));
+	outtextxy(390,220,_T("-"));
+	outtextxy(30,320,_T("4"));
+	outtextxy(150,320,_T("5"));
+	outtextxy(270,320,_T("6"));
+	outtextxy(390,320,_T("*"));
+	outtextxy(30,420,_T("1"));
+	outtextxy(150,420,_T("2"));
+	outtextxy(270,420,_T("3"));
+	outtextxy(390,420,_T("/"));
+	outtextxy(30,520,_T("."));
+	outtextxy(150,520,_T("0"));	
+	outtextxy(390,520,_T("="));
+	outtextxy(260,120,_T("<"));
+	outtextxy(270,520,_T("C"));
+}//计算器界面；
+
+int count=0;
+char str[N]={'0'};			//字符数组赋初始值；
+figure st[N];
+char suffix[N][N]={'0'};
+stack sta;
+
+void mouse_imfor()
+{
+	int length=0;
+	int i=-1;
+	int go=0;
+	for(int a=0;a<N;a++)
+		strcpy(st[i].x,"0");
+	MOUSEMSG m;
+	while(go==0)
+	{
+		setcolor(DARKGRAY);
+		settextstyle(60,20,_T("幼圆"));
+		m=GetMouseMsg();
+		switch(m.uMsg)
+		{
+		case WM_LBUTTONDOWN:
+			if(m.x>0&&m.x<120&&m.y>100&&m.y<200)
+			{
+				++i;count++;
+				str[i]='(';
+			}
+			if(m.x>120&&m.x<240&&m.y>100&&m.y<200)
+			{
+				++i;count++;
+				str[i]=')';
+			}
+			if(m.x>240&&m.x<360&&m.y>100&&m.y<200)
+			{
+				i--;
+				count--;
+				outtextxy(460-i*20,20,_T(str));
+				outtextxy(460-(i+1)*20,20,_T(" "));		//按'<'键清除后一个，往后退；
+			}
+			if(m.x>360&&m.x<480&&m.y>100&&m.y<200)
+			{
+				++i;count++;
+				str[i]='+';
+			}
+			if(m.x>0&&m.x<120&&m.y>200&&m.y<300)
+			{
+				++i;count++;
+				str[i]='7';
+			}
+			if(m.x>120&&m.x<240&&m.y>200&&m.y<300)
+			{
+				++i;count++;
+				str[i]='8';
+			}
+			if(m.x>240&&m.x<360&&m.y>200&&m.y<300)
+			{
+				++i;count++;
+				str[i]='9';
+			}
+			if(m.x>360&&m.x<480&&m.y>200&&m.y<300)
+			{
+				++i;count++;
+				str[i]='-';
+			}
+			if(m.x>0&&m.x<120&&m.y>300&&m.y<400)
+			{
+				++i;count++;
+				str[i]='4';
+			}
+			if(m.x>120&&m.x<240&&m.y>300&&m.y<400)
+			{
+				++i;count++;
+				str[i]='5';
+			}
+			if(m.x>240&&m.x<360&&m.y>300&&m.y<400)
+			{
+				++i;count++;
+				str[i]='6';
+			}
+			if(m.x>360&&m.x<480&&m.y>300&&m.y<400)
+			{
+				++i;count++;
+				str[i]='*';
+			}
+			if(m.x>0&&m.x<120&&m.y>400&&m.y<500)
+			{
+				++i;count++;
+				str[i]='1';
+			}
+			if(m.x>120&&m.x<240&&m.y>400&&m.y<500)
+			{
+				++i;count++;
+				str[i]='2';
+			}
+			if(m.x>240&&m.x<360&&m.y>400&&m.y<500)
+			{
+				++i;count++;
+				str[i]='3';
+			}
+			if(m.x>360&&m.x<480&&m.y>400&&m.y<500)
+			{
+				++i;count++;
+				str[i]='/';
+			}
+			if(m.x>0&&m.x<120&&m.y>500&&m.y<600)
+			{
+				++i;count++;
+				str[i]='.';
+			}
+			if(m.x>120&&m.x<240&&m.y>500&&m.y<600)
+			{
+				++i;count++;
+				str[i]='0';
+			}
+			outtextxy(460-i*20,20,_T(str));
+			if(m.x>240&&m.x<360&&m.y>500&&m.y<600)
+			{
+				++i;count++;
+				str[i]='C';
+			}
+			str[i+1]='\0';
+			if(m.x>360&&m.x<480&&m.y>500&&m.y<600)
+			{
+				++i;count++;
+				str[i]='=';
+				str[i+1]='\0';
+			}
+			Sleep(100);
+			break;
+		case WM_RBUTTONUP:
+			go=1;
+			break;
+		}
+		if(str[i]=='C'||str[i]=='=')
+			break;	
+	}
+	if(str[i]=='C')
+	{
+		setbkcolor(BLACK);
+		cleardevice();
+		calcul_memu();
+		mouse_imfor();
+	}//按'C'键清空界面；
+	else if(str[i]=='=')
+	{
+		chuli(str,st);
+		init(&sta);
+		inffixtosuffix(&sta,st,suffix,&length);
+		setbkcolor(BLACK);
+		cleardevice();
+		calcul_memu();
+		init(&sta);
+		suffixtoresult(&sta,suffix,length);
+
+		go=0;
+		while(go==0)
+		{
+			m=GetMouseMsg();
+			switch(m.uMsg)
+			{
+			case WM_LBUTTONDOWN:
+				if(m.x>240&&m.x<360&&m.y>500&&m.y<600)
+				{
+					str[i]='C';
+				}
+				str[i+1]='\0';
+				break;
+			case WM_RBUTTONUP:
+				go=1;
+				break;
+			}
+			if(str[i]=='C')
+				break;
+		}	
+		if(str[i]=='C')
+		{
+			setbkcolor(BLACK);
+			cleardevice();
+			calcul_memu();
+			mouse_imfor();
+		}
+	}
+
+}//处理鼠标的消息；
+
+void clear_cal()
+{
+	setbkcolor(BLACK);
+	calcul_memu();
+}//初始化界面;
+
+int q;					//定义一个全局变量，用来计数结构体数组的数量；
+
+void chuli(char ch[],struct figure a[])
+{
+	q=0;
+	int m=0,j;
+	char asd[15]={'0'};
+	printf("\ncount=%d\n",count);
+	while(m<count)
+	{
+		j=0;
+		if(ch[m]=='=')
+			break;
+		if(ch[m]=='('||ch[m]==')')
+		{
+			asd[j]=ch[m];
+			asd[j+1]='\0';
+			m++;
+			strcpy(a[q].x,asd);
+			q++;
+			continue;
+		}
+		if(ch[m]=='+'||ch[m]=='-')
+		{
+			if(ch[m-1]=='+'||ch[m-1]=='-'||ch[m-1]=='*'||ch[m-1]=='/'||m==0||ch[m]=='(')
+			{
+				asd[j]=ch[m];
+				m++;
+				j++;
+				while(ch[m]!='+'&&ch[m]!='-'&&ch[m]!='*'&&ch[m]!='/'&&ch[m]!=')')
+				{
+					asd[j]=ch[m];
+					j++;
+					m++;
+				}
+				asd[j]='\0';
+				strcpy(a[q].x,asd);
+				q++;
+			}
+			else 
+			{
+				asd[j]=ch[m];
+				asd[j+1]='\0';
+				m++;
+				strcpy(a[q].x,asd);
+				q++;
+			}
+			continue;
+		}
+		if(ch[m]=='*'||ch[m]=='/')
+		{
+			asd[j]=ch[m];
+			asd[j+1]='\0';
+			m++;
+			strcpy(a[q].x,asd);
+			q++;
+			continue;
+		}
+		if(ch[m]!='+'&&ch[m]!='-'&&ch[m]!='*'&&ch[m]!='/'&&ch[m]!='('&&ch[m]!=')')
+		{
+			while(ch[m]!='+'&&ch[m]!='-'&&ch[m]!='*'&&ch[m]!='/'&&ch[m]!='('&&ch[m]!=')'&&ch[m]!='=')
+			{
+				asd[j]=ch[m];
+				j++;
+				m++;
+			}
+			asd[j]='\0';
+			strcpy(a[q].x,asd);
+			q++;
+			continue;
+		}
+	}
+}//将字符串分割出来；
+
+void init(stack *sta)
+{
+	int i;
+	for(i=0;i<max;i++)
+		strcpy(sta->data[i],"0");
+	for(i=0;i<5;i++)
+		printf("初始化栈：%s\n",sta->data[i]);
+	sta->top=-1;
+}//初始化栈；
+
+void inffixtosuffix(stack *sta,struct figure *a,char suffix[][N],int *length)
+{
+	int i=0;
+	int j=0;
+	for(i=0;i<q;)
+	{
+		if(strcmp(a[i].x,"(")==0)
+		{
+			sta->top++;
+			strcpy(sta->data[sta->top],a[i].x);
+			i++;
+			continue;
+		}
+		else if(strcmp(a[i].x,")")==0)
+		{
+			while(strcmp(sta->data[sta->top],"(")!=0&&sta->top!=-1)
+			{
+				strcpy(suffix[j],sta->data[sta->top]);
+				sta->top--;
+				j++;
+			}
+			strcpy(sta->data[sta->top],"0");
+			i++;
+			sta->top--;
+			continue;
+		}
+		else if(strcmp(a[i].x,"=")==0)
+		{
+			i++;
+			continue;
+		}
+		else if(strcmp(a[i].x,"+")==0||strcmp(a[i].x,"-")==0)
+		{
+			while(strcmp(sta->data[sta->top],"(")!=0&&sta->top!=-1)
+			{	
+				strcpy(suffix[j],sta->data[sta->top]);
+				sta->top--;
+				j++;
+			}
+			sta->top++;
+			strcpy(sta->data[sta->top],a[i].x);
+			i++;
+			continue;
+		}
+		else if(strcmp(a[i].x,"*")==0||strcmp(a[i].x,"/")==0)
+		{
+			while(strcmp(sta->data[sta->top],"(")!=0&&sta->top!=-1&&strcmp(sta->data[sta->top],"+")!=0&&strcmp(sta->data[sta->top],"-")!=0)
+			{
+				strcpy(suffix[j],sta->data[sta->top]);
+				sta->top--;
+				j++;
+			}
+			sta->top++;
+			strcpy(sta->data[sta->top],a[i].x);
+			i++;
+			continue;
+		}
+		else 
+		{
+			strcpy(suffix[j],a[i].x);
+			j++;
+			i++;
+			continue;
+		}
+	}
+	while(sta->top!=-1)
+	{
+		strcpy(suffix[j],sta->data[sta->top]);
+		sta->top--;
+		j++;
+	}
+	*length =j;
+	printf("\nlength=%d\n\n",*length);
+
+}//中缀表达式变为后缀表达式；
+
+void suffixtoresult(stack *sta,char suffix[][N],int length)
+{
+	int i=0;
+	double result=0;
+	while(i<length)
+	{
+		if(strcmp(suffix[i],"+")==0)
+		{
+			printf("\n\nsta=%s\n\n",sta->data[sta->top]);
+			printf("\n\nsta=%s\n\n",sta->data[sta->top-1]);
+
+			result=atof(sta->data[sta->top-1])+atof(sta->data[sta->top]);
+			sta->top--;
+			sprintf(sta->data[sta->top],"%.2lf",result);
+			i++;
+			continue;
+		}
+		else if(strcmp(suffix[i],"-")==0)
+		{
+			result=atof(sta->data[sta->top-1])-atof(sta->data[sta->top]);
+			sta->top--;
+			sprintf(sta->data[sta->top],"%.2lf",result);
+			i++;
+			continue;
+		}
+		else if(strcmp(suffix[i],"*")==0)
+		{
+			result=atof(sta->data[sta->top-1])*atof(sta->data[sta->top]);
+			sta->top--;
+			sprintf(sta->data[sta->top],"%.2lf",result);
+			i++;
+			continue;
+		}
+		else if(strcmp(suffix[i],"/")==0)
+		{
+			result=atof(sta->data[sta->top-1])/atof(sta->data[sta->top]);
+			sta->top--;
+			sprintf(sta->data[sta->top],"%.2lf",result);
+			i++;
+			continue;
+		}
+		else
+		{
+			sta->top++;
+			strcpy(sta->data[sta->top],suffix[i]);
+			i++;
+			continue;
+		}
+	}
+	printf("\n\nresult=%f\n",result);
+//	printf("\n\nsta=%s\n\n",sta->data[sta->top]);
+//	printf("sta->top=%d\n\n",sta->top);
+	setcolor(DARKGRAY);
+	settextstyle(60,20,_T("幼圆"));
+	if(sta->top==0)
+		outtextxy(480-strlen(sta->data[sta->top])*20,20,_T(sta->data[sta->top]));
+	else if(sta->top!=0)
+		outtextxy(190,20,_T("ERROR"));
+}//后缀表达式输出结果;
+
+void main()
+{
+	initgraph(480,600);		//设置窗口的大小；
+	setbkcolor(BLACK);		//设置背景色为黑色；
+	cleardevice();			//用背景色来清空屏幕；
+	calcul_memu();
+	mouse_imfor();
+	closegraph();
+	printf("s：%s\n",str);
+	printf("结构体测试：\n");
+	for(int i=0;i<q;i++)
+		printf("%s\n",st[i].x);
+	printf("suffix:\n");
+	for(int m=0;m<q;m++)
+		printf("%s\n",suffix[m]);
+	getch();
+}
