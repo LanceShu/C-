@@ -1,2 +1,2 @@
-# Calculater
+# C语言 + EasyX = 图形界面计算器
 利用C语言结合EasyX库开发的具有图形界面的计算器
