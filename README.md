@@ -1,2 +1,2 @@
-# calculater
+# Calculater
 利用C语言结合EasyX库开发的具有图形界面的计算器
